@@ -1,0 +1,36 @@
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+stages:
+  - build
+  - test
+  - publish
+  - deploy
+
+build:
+  stage: build
+  script:
+    - dotnet restore
+    - dotnet build --configuration $buildConfiguration
+
+test:
+  stage: test
+  script:
+    - dotnet test --configuration $buildConfiguration --logger trx --results-directory TestResults
+
+publish:
+  stage: publish
+  script:
+    - dotnet publish --configuration $buildConfiguration --output ./publish
+
+deploy:
+  stage: deploy
+  script:
+    - scp -r ./publish user@server:/var/www/html/
